@@ -1,3 +1,4 @@
+$VERBOSE = nil
 require "json"
 require "openssl"
 require "encrypted_strings"
@@ -125,6 +126,29 @@ class Keeper
     else
       puts "Either description or Master Pass is wrong"
     end
+  end
+
+  def seeDescriptions()
+    ##
+    # For a given user and master password, show what each key 
+    # decrypts to. If you use the same master-password for everything
+    # they'll all show you their correct descriptions. If you didn't
+    # you'll see garbage decrypts
+    
+    puts "Enter Master Pass (will only show descriptions from this master pass):"
+    mpwd = STDIN.gets.chomp
+    puts "\nAvailable Descriptions: \n"
+
+    current_pwds = JSON.parse File.read(@connection)
+
+    current_pwds.each { |key, value|
+      begin
+        enc_desc = key.decrypt(:symmetric, :password => mpwd)
+        puts enc_desc
+      rescue
+        nil
+      end
+    }
   end
 
   def purgeUser()

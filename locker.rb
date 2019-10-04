@@ -21,6 +21,10 @@ elsif action == 'create'
 
 elsif action == 'purge'
   kpr.purgeUser()
+
+elsif action == 'desc'
+  kpr.seeDescriptions()
+
 elsif action == 'delete'
   kpr.deletePassword()
 else
