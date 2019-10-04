@@ -2,9 +2,9 @@
 
 A simple password locker that works from the command line. 
 
-NOTE: This is not in particularly secure because if someone knows you're using this
+**NOTE: This is not in particularly secure because if someone knows you're using this
 tool, they can also know the encryption protocol being used and brute force is
-feasible. 
+feasible.**
 
 The idea is simple, each user is represented by a file saved somewhere. That
 file contains combinations of password descriptions and actual passwords...
