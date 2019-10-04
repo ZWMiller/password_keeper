@@ -37,6 +37,8 @@ has several abilities:
 * Add a password to that user
 * Get a password based on a description
 * Delete a password from the user
+* See all descriptions that match a given master password
+* Generate a random, alphanumeric password for a description
 * Purge a user
 
 All of these are locked by a master password (except user creation) and
