@@ -31,5 +31,5 @@ elsif action == 'generate'
 elsif action == 'delete'
   kpr.deletePassword()
 else
-  puts 'Not a valid action. Valid actions are [add, get, create, delete, purge]'
+  puts 'Not a valid action. Valid actions are [add, get, create, delete, purge, desc, generate]'
 end

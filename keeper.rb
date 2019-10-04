@@ -1,4 +1,5 @@
 $VERBOSE = nil
+require 'io/console'
 require "json"
 require "openssl"
 require "encrypted_strings"
@@ -17,7 +18,8 @@ class Keeper
     ##
     # On creation, sets the username and the expected hidden file locations
     @username = username
-    @connection = ".#{username}.kpr"
+    base_url = loadConfig()['base_url']
+    @connection = "#{base_url}/.#{username}.kpr"
   end
 
   def createUser()
@@ -56,10 +58,17 @@ class Keeper
     desc = STDIN.gets.chomp
 
     puts "Enter Pass:"
-    pwd = STDIN.gets.chomp
+    pwd = STDIN.noecho(&:gets).chomp
 
+    puts "Enter Pass Again:"
+    pwd2 = STDIN.noecho(&:gets).chomp
+
+    if pwd != pwd2
+      puts "Passwords didn't match, failing out"
+      exit
+    end
     puts "Enter Master Pass:"
-    mpwd = STDIN.gets.chomp
+    mpwd = STDIN.noecho(&:gets).chomp
 
     enterIntoRecord(pwd, desc, mpwd)
   end
@@ -77,8 +86,8 @@ class Keeper
 
     pwd = [*('a'..'z'),*('0'..'9')].shuffle[0,15].join
 
-    puts "Enter Master Pass:"
-    mpwd = STDIN.gets.chomp
+    puts "Enter Master Pass:" 
+    mpwd = STDIN.noecho(&:gets).chomp
 
     enterIntoRecord(pwd, desc, mpwd)
   end
@@ -97,13 +106,14 @@ class Keeper
     desc = STDIN.gets.chomp
 
     puts "Enter Master Pass:"
-    mpwd = STDIN.gets.chomp
+    mpwd = STDIN.noecho(&:gets).chomp
 
     enc_desc = desc.encrypt(:symmetric, :password => mpwd)
     current_pwds = JSON.parse File.read(@connection)
 
     if current_pwds.key?(enc_desc)
       enc_pwd = current_pwds[enc_desc]
+      puts ''
       puts enc_pwd.decrypt(:symmetric, :password=>mpwd)
     else
       puts 'Either description or Master Pass is wrong'
@@ -123,7 +133,7 @@ class Keeper
     desc = STDIN.gets.chomp
 
     puts "Enter Master Pass:"
-    mpwd = STDIN.gets.chomp
+    mpwd = STDIN.noecho(&:gets).chomp
 
     enc_desc = desc.encrypt(:symmetric, :password => mpwd)
     current_pwds = JSON.parse File.read(@connection)
@@ -145,9 +155,12 @@ class Keeper
     # decrypts to. If you use the same master-password for everything
     # they'll all show you their correct descriptions. If you didn't
     # you'll see garbage decrypts
+    if not checkFile(@username)
+      exit
+    end
 
     puts "Enter Master Pass (will only show descriptions from this master pass):"
-    mpwd = STDIN.gets.chomp
+    mpwd = STDIN.noecho(&:gets).chomp
     puts "\nAvailable Descriptions: \n"
 
     current_pwds = JSON.parse File.read(@connection)
@@ -187,6 +200,10 @@ class Keeper
     File.open(@connection,"w") do |f|
       f.write(current_pwds.to_json)
     end
+  end
+
+  def loadConfig()
+    JSON.parse File.read("config.cfg")
   end
 end
 
