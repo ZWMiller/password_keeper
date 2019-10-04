@@ -3,6 +3,7 @@ require 'io/console'
 require "json"
 require "openssl"
 require "encrypted_strings"
+require "clipboard"
 
 class Keeper
   ##
@@ -114,7 +115,8 @@ class Keeper
     if current_pwds.key?(enc_desc)
       enc_pwd = current_pwds[enc_desc]
       puts ''
-      puts enc_pwd.decrypt(:symmetric, :password=>mpwd)
+      puts 'Copying password to clipboard'
+      Clipboard.copy(enc_pwd.decrypt(:symmetric, :password=>mpwd))
     else
       puts 'Either description or Master Pass is wrong'
     end
