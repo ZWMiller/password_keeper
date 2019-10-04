@@ -57,21 +57,32 @@ class Keeper
 
     puts "Enter Pass:"
     pwd = STDIN.gets.chomp
-    
+
     puts "Enter Master Pass:"
     mpwd = STDIN.gets.chomp
 
-    enc_pwd = pwd.encrypt(:symmetric, :password => mpwd)
-    enc_desc = desc.encrypt(:symmetric, :password => mpwd)
-
-    current_pwds = JSON.parse File.read(@connection)
-    current_pwds[enc_desc] = enc_pwd
-
-    File.open(@connection,"w") do |f|
-      f.write(current_pwds.to_json)
-    end
+    enterIntoRecord(pwd, desc, mpwd)
   end
-  
+
+  def generatePassword()
+    ##
+    # Take a description, generate an alphanumeric password, encrypt them, and
+    # add them to a user's record. 
+    if not checkFile(@username)
+      exit
+    end
+
+    puts "Enter Pass Description:"
+    desc = STDIN.gets.chomp
+
+    pwd = [*('a'..'z'),*('0'..'9')].shuffle[0,15].join
+
+    puts "Enter Master Pass:"
+    mpwd = STDIN.gets.chomp
+
+    enterIntoRecord(pwd, desc, mpwd)
+  end
+
   def getPassword()
     ##
     # Take a desciption and master password, encrypt the description and see
@@ -90,7 +101,7 @@ class Keeper
 
     enc_desc = desc.encrypt(:symmetric, :password => mpwd)
     current_pwds = JSON.parse File.read(@connection)
-    
+
     if current_pwds.key?(enc_desc)
       enc_pwd = current_pwds[enc_desc]
       puts enc_pwd.decrypt(:symmetric, :password=>mpwd)
@@ -116,10 +127,10 @@ class Keeper
 
     enc_desc = desc.encrypt(:symmetric, :password => mpwd)
     current_pwds = JSON.parse File.read(@connection)
-    
+
     if current_pwds.key?(enc_desc)
       current_pwds.delete(enc_desc)
-    
+
       File.open(@connection,"w") do |f|
         f.write(current_pwds.to_json)
       end
@@ -134,7 +145,7 @@ class Keeper
     # decrypts to. If you use the same master-password for everything
     # they'll all show you their correct descriptions. If you didn't
     # you'll see garbage decrypts
-    
+
     puts "Enter Master Pass (will only show descriptions from this master pass):"
     mpwd = STDIN.gets.chomp
     puts "\nAvailable Descriptions: \n"
@@ -162,6 +173,19 @@ class Keeper
     if confirm == "Yes"
       puts "Deleting record for user #{@username}"
       File.delete(@connection) if File.exist?(@connection)
+    end
+  end
+
+  private
+  def enterIntoRecord(pwd, desc, mpwd)
+    enc_pwd = pwd.encrypt(:symmetric, :password => mpwd)
+    enc_desc = desc.encrypt(:symmetric, :password => mpwd)
+
+    current_pwds = JSON.parse File.read(@connection)
+    current_pwds[enc_desc] = enc_pwd
+
+    File.open(@connection,"w") do |f|
+      f.write(current_pwds.to_json)
     end
   end
 end
