@@ -205,7 +205,7 @@ class Keeper
   end
 
   def loadConfig()
-    JSON.parse File.read("config.cfg")
+    JSON.parse File.read(File.join(__dir__,"config.cfg"))
   end
 end
 
